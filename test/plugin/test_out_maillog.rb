@@ -14,11 +14,41 @@ class MaillogOutputTest < Test::Unit::TestCase
   #   utc
   # ]
 
-  def create_driver(conf = CONFIG, tag='test')
+  def create_driver(conf = CONFIG, tag = 'test')
     Fluent::Test::OutputTestDriver.new(Fluent::MaillogOutput, tag).configure(conf)
   end
 
   def test_emit
+maillog = <<"EOS"
+Nov  5 22:39:01 hostname postfix/smtpd[10802]: 7D4381EB80E5: client=192-168-0-1.xxx.xxxx.ne.jp[192.168.0.1], sasl_method=PLAIN, sasl_username=xxxxx@from.example.com
+Nov  5 22:39:02 hostname postfix/cleanup[10807]: 7D4381EB80E5: message-id=<545A28A8.9070401@from.example.com>
+Nov  5 22:39:03 hostname opendkim[386]: 7D4381EB80E5: DKIM-Signature field added (s=default, d=from.example.com)
+Nov  5 22:39:04 hostname postfix/qmgr[540]: 7D4381EB80E5: from=<xxxxx@from.example.com>, size=662, nrcpt=2 (queue active)
+Nov  5 22:39:05 hostname postfix/smtp[10808]: 7D4381EB80E5: to=<zzzzz@to.example.com>, relay=mail.to.example.com[192.168.0.100]:25, delay=1, delays=0.01/0.17/0.81/0.02, dsn=2.0.0, status=sent (250 ok:  Message 662556263 accepted)
+Nov  5 22:39:06 hostname postfix/qmgr[540]: 7D4381EB80E5: removed
+EOS
     d = create_driver
+    d.run do
+      maillog.each_line do |message|
+        d.emit({'message' => message.chomp}, Time.parse("2012-01-01 00:00:00 UTC").to_i)
+      end
+    end
+    assert_equal 1, d.emits.size
+    d.emits.each do |emit|
+      assert_equal 'test', emit[0]
+      assert_equal Time.parse("2012-01-01 00:00:00 UTC").to_i, emit[1]
+      assert_equal '7D4381EB80E5', emit[2]['qid']
+      assert_equal '545A28A8.9070401@from.example.com', emit[2]['message_id']
+      assert_equal 'default', emit[2]['dkim_s']
+      assert_equal 'from.example.com', emit[2]['dkim_d']
+      assert_equal 'zzzzz@to.example.com', emit[2]['to']
+      assert_equal 'mail.to.example.com[192.168.0.100]:25', emit[2]['relay']
+      assert_equal '1', emit[2]['delay']
+      assert_equal '0.01/0.17/0.81/0.02', emit[2]['delays']
+      assert_equal '2.0.0', emit[2]['dsn']
+      assert_equal 'sent', emit[2]['status']
+      assert_equal '250 ok:  Message 662556263 accepted', emit[2]['message']
+      assert_equal Time.parse("Nov  5 22:39:05").to_i, emit[2]['time']
+    end
   end
 end
