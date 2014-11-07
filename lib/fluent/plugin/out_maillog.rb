@@ -1,9 +1,13 @@
 class Fluent::MaillogOutput < Fluent::Output
   Fluent::Plugin.register_output('maillog', self)
 
+  attr_accessor :records
+  attr_reader   :latest_clean_time
+
   def initialize
     super
     @records = Hash.new
+    @latest_clean_time = Time.now.to_i
   end
 
   def configure(conf)
@@ -51,7 +55,7 @@ class Fluent::MaillogOutput < Fluent::Output
       return nil if qid.nil? || time.nil?
       record = @records[qid]
       if record.nil?
-        record = {'qid' => qid} 
+        record = { 'qid' => qid, 'time' => Time.parse(time).to_i } 
         @records.store(qid, record)
       end
 
@@ -84,6 +88,16 @@ class Fluent::MaillogOutput < Fluent::Output
       end
     end
 
+    clean_records
+
     return nil
+  end
+
+  def clean_records(clean_interval = 60, survival_time = 3600)
+    return if Time.now.to_i < @latest_clean_time + clean_interval
+    @records.delete_if do |key, record|
+      Time.now.to_i > record['time'] + survival_time
+    end
+    @latest_clean_time = Time.now.to_i
   end
 end

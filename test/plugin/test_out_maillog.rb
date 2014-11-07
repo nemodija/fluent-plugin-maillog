@@ -51,4 +51,32 @@ EOS
       assert_equal Time.parse("Nov  5 22:39:05").to_i, emit[2]['time']
     end
   end
+
+  def test_clean_records_check_time
+    t = Fluent::MaillogOutput.new
+    latest_clean_time = t.latest_clean_time
+    t.records = {
+      'qid-001' => { 'time' => Time.now.to_i - 100 },
+      'qid-002' => { 'time' => Time.now.to_i - 90  }
+    }
+    sleep 1
+    t.clean_records(1, 100)
+    assert_equal false, t.records.keys.include?('qid-001')
+    assert_equal true,  t.records.keys.include?('qid-002')
+    assert_equal true,  t.latest_clean_time > latest_clean_time
+  end
+
+  def test_clean_records_check_less_than_time
+    t = Fluent::MaillogOutput.new
+    latest_clean_time = t.latest_clean_time
+    t.records = {
+      'qid-001' => { 'time' => Time.now.to_i - 100 },
+      'qid-002' => { 'time' => Time.now.to_i - 90  }
+    }
+    sleep 1
+    t.clean_records(10, 100)
+    assert_equal true, t.records.keys.include?('qid-001')
+    assert_equal true, t.records.keys.include?('qid-002')
+    assert_equal true, t.latest_clean_time == latest_clean_time
+  end
 end
