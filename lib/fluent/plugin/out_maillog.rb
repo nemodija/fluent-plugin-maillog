@@ -1,6 +1,8 @@
 class Fluent::MaillogOutput < Fluent::Output
   Fluent::Plugin.register_output('maillog', self)
 
+  config_param :unremoved_records_path, :string, :default => nil
+
   attr_accessor :records
   attr_reader   :latest_clean_time
 
@@ -29,9 +31,11 @@ class Fluent::MaillogOutput < Fluent::Output
 
   def start
     super
+    @records = unremoved_records_read
   end
 
   def shutdown
+    unremoved_records_write
     super
   end
 
@@ -99,5 +103,19 @@ class Fluent::MaillogOutput < Fluent::Output
       Time.now.to_i > record['time'] + survival_time
     end
     @latest_clean_time = Time.now.to_i
+  end
+
+  def unremoved_records_read(unremoved_records_path = @unremoved_records_path)
+    return Hash.new if unremoved_records_path.nil?
+    return Hash.new if !FileTest.exists?(unremoved_records_path)
+    h = JSON.parse(File.read(unremoved_records_path, :encoding => Encoding::UTF_8))
+    File.unlink unremoved_records_path
+    return h
+  end
+
+  def unremoved_records_write(unremoved_records_path = @unremoved_records_path, records = @records)
+    return if unremoved_records_path.nil?
+    return if records.length < 1
+    File.write(unremoved_records_path, records.to_json)
   end
 end

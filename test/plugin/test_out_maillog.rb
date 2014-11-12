@@ -79,4 +79,56 @@ EOS
     assert_equal true, t.records.keys.include?('qid-002')
     assert_equal true, t.latest_clean_time == latest_clean_time
   end
+
+  def test_unremoved_records_write
+    Dir.mktmpdir do |dir|
+      t = Fluent::MaillogOutput.new
+      records = {'7D4381EB80E5' => {'qid' => '7D4381EB80E5'}}
+      t.unremoved_records_write("#{dir}/ut_temp", records)
+      assert_equal 1, Dir.glob("#{dir}/*").count
+      assert_equal true, JSON.parse(File.read("#{dir}/ut_temp")) == records
+    end
+  end
+
+  def test_unremoved_records_write_with_path_nil
+    Dir.mktmpdir do |dir|
+      t = Fluent::MaillogOutput.new
+      records = {'7D4381EB80E5' => {'qid' => '7D4381EB80E5'}}
+      t.unremoved_records_write(nil, records)
+      assert_equal 0, Dir.glob("#{dir}/*").count
+    end
+  end
+
+  def test_unremoved_records_write_with_records_zero
+    Dir.mktmpdir do |dir|
+      t = Fluent::MaillogOutput.new
+      records = {}
+      t.unremoved_records_write("#{dir}/ut_temp", records)
+      assert_equal 0, Dir.glob("#{dir}/*").count
+    end
+  end
+
+  def test_unremoved_records_read
+    t = Fluent::MaillogOutput.new
+    f = Tempfile.new('ut_temp')
+    records = {'7D4381EB80E5' => {'qid' => '7D4381EB80E5'}}
+    File.write(f.path, records.to_json)
+    actual = t.unremoved_records_read(f.path)
+    assert_equal false, FileTest.exists?(f.path)
+    assert_equal true, actual == records
+  end
+
+  def test_unremoved_records_read_with_path_nil
+    t = Fluent::MaillogOutput.new
+    actual = t.unremoved_records_read(nil)
+    assert_equal true, actual == {}
+  end
+
+  def test_unremoved_records_read_with_file_not_exists
+    Dir.mktmpdir do |dir|
+      t = Fluent::MaillogOutput.new
+      actual = t.unremoved_records_read("#{dir}/ut_temp")
+      assert_equal true, actual == {}
+    end
+  end
 end
