@@ -2,6 +2,8 @@ class Fluent::MaillogOutput < Fluent::Output
   Fluent::Plugin.register_output('maillog', self)
 
   config_param :unremoved_records_path, :string, :default => nil
+  config_param :clean_interval, :integer, :default => 60
+  config_param :survival_time, :integer, :default => 3600
 
   attr_accessor :records
   attr_reader   :latest_clean_time
@@ -97,7 +99,7 @@ class Fluent::MaillogOutput < Fluent::Output
     return nil
   end
 
-  def clean_records(clean_interval = 60, survival_time = 3600)
+  def clean_records(clean_interval = @clean_interval, survival_time = @survival_time)
     return if Time.now.to_i < @latest_clean_time + clean_interval
     @records.delete_if do |key, record|
       Time.now.to_i > record['time'] + survival_time
