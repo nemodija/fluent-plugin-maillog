@@ -4,6 +4,8 @@ class Fluent::MaillogOutput < Fluent::Output
   config_param :unremoved_records_path, :string, :default => nil
   config_param :clean_interval, :integer, :default => 60
   config_param :survival_time, :integer, :default => 3600
+  config_param :start_send_time, :string, :default => nil
+  config_param :end_send_time, :string, :default => nil
 
   attr_accessor :records
   attr_reader   :latest_clean_time
@@ -82,7 +84,8 @@ class Fluent::MaillogOutput < Fluent::Output
             record[name] = Regexp.last_match[name.to_sym]
           end
           record['time'] = Time.parse(time).to_i
-          return record
+          return record if reemit?(time)
+          return nil
         end
       end
 
@@ -119,5 +122,12 @@ class Fluent::MaillogOutput < Fluent::Output
     return if unremoved_records_path.nil?
     return if records.length < 1
     File.write(unremoved_records_path, records.to_json)
+  end
+
+  def reemit?(send_time = nil, start_send_time = @start_send_time, end_send_time = @end_send_time)
+    return false if send_time.nil?
+    return false if !start_send_time.nil? && Time.parse(start_send_time).to_i > Time.parse(send_time).to_i
+    return false if !end_send_time.nil? && Time.parse(end_send_time).to_i < Time.parse(send_time).to_i
+    return true
   end
 end
