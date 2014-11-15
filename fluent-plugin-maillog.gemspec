@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.version       = "0.0.1"
   spec.authors       = ["nemonium"]
   spec.email         = ["kenichiro.nemoto@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{Summarizing maillog.}
+  spec.description   = %q{Summarizing maillog.}
   spec.homepage      = "https://github.com/nemonium/fluent-plugin-maillog"
   spec.license       = "MIT"
 

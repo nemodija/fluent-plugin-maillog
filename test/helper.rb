@@ -23,6 +23,7 @@ unless ENV.has_key?('VERBOSE')
 end
 
 require 'logger'
+require 'json'
 
 require 'fluent/plugin/out_maillog'
 
