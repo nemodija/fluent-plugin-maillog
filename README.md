@@ -1,29 +1,48 @@
 # Fluent::Plugin::Maillog
 
-TODO: Write a gem description
+Aggregate a maillog for Postfix.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+    gem build fluent-plugin-maillog.gemspec
+    gem install fluent-plugin-maillog-0.0.1.gem
 
-    gem 'fluent-plugin-maillog'
+## Config
 
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install fluent-plugin-maillog
+|param|description|default|
+|-|-|-|
+|tag|整形後のタグ|*Required*|
+|cache_dump_file|キャッシュ中のmaillogを停止時に出力するファイル|nil|
+|clean_interval_time|キャッシュをcleanする間隔|60 (sec)|
+|lifetime|キャッシュ上の生存期間|3600 (sec)|
+|emit_start_time|emit期間の指定(開始)|nil|
+|emit_end_time|emit期間の指定(終了)|nil|
 
 ## Usage
 
-TODO: Write usage instructions here
+~~~
+<source>
+  type tail
+  format /(?<message>.*)/
+  path /var/log/maillog
+  pos_file /usr/local/fluentd/run/maillog.pos
+  tag next
+</source>
 
-## Contributing
+<match next>
+  type maillog
+  tag next.next
+</match>
 
-1. Fork it ( https://github.com/[my-github-username]/fluent-plugin-maillog/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+<match next.next>
+  stdout
+</match>
+~~~
+
+## Development
+
+    bundle install --path vendor/bundle
+
+## Testing
+
+    rake test
