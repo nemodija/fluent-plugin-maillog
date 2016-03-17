@@ -1,6 +1,7 @@
 class Fluent::MaillogOutput < Fluent::Output
   Fluent::Plugin.register_output('maillog', self)
 
+  config_param :tag,                 :string,  :default => nil
   config_param :cache_dump_file,     :string,  :default => nil
   config_param :clean_interval_time, :integer, :default => 60
   config_param :lifetime,            :integer, :default => 3600
@@ -18,6 +19,9 @@ class Fluent::MaillogOutput < Fluent::Output
 
   def configure(conf)
     super
+
+    raise "Required config_param is missing: tag" if @tag.nil?
+
     @base_pattern = /^(?<time>.{3}\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2}) (?<host>\S+) (?<cmd>.+)\[\d+\]: (?<qid>[0-9a-zA-Z]+): (?<message>.+)$/
     # patterns
     @regist_patterns = [
@@ -48,7 +52,7 @@ class Fluent::MaillogOutput < Fluent::Output
       record.values.each do |line|
         summary = summarize(line)
         next if summary.nil?
-        Fluent::Engine.emit(tag, time, summary)
+        Fluent::Engine.emit(@tag, time, summary)
       end
     end
     chain.next
