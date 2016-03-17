@@ -7,6 +7,7 @@ class MaillogOutputTest < Test::Unit::TestCase
   end
 
   CONFIG = %[
+    tag test.test
   ]
   # CONFIG = %[
   #   path #{TMP_DIR}/out_file_test
@@ -35,12 +36,13 @@ EOS
     end
     assert_equal 1, d.emits.size
     d.emits.each do |emit|
-      assert_equal 'test', emit[0]
+      assert_equal 'test.test', emit[0]
       assert_equal Time.parse("2012-01-01 00:00:00 UTC").to_i, emit[1]
       assert_equal '7D4381EB80E5', emit[2]['qid']
       assert_equal '545A28A8.9070401@from.example.com', emit[2]['message_id']
-      assert_equal 'default', emit[2]['dkim_s']
-      assert_equal 'from.example.com', emit[2]['dkim_d']
+      assert_equal 'xxxxx@from.example.com', emit[2]['from']
+      assert_equal '662', emit[2]['size']
+      assert_equal '2', emit[2]['nrcpt']
       assert_equal 'zzzzz@to.example.com', emit[2]['to']
       assert_equal 'mail.to.example.com[192.168.0.100]:25', emit[2]['relay']
       assert_equal '1', emit[2]['delay']

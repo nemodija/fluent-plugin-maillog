@@ -22,17 +22,17 @@ class Fluent::MaillogOutput < Fluent::Output
 
     raise "Required config_param is missing: tag" if @tag.nil?
 
-    @base_pattern = /^(?<time>.{3}\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2}) (?<host>\S+) (?<cmd>.+)\[\d+\]: (?<qid>[0-9a-zA-Z]+): (?<message>.+)$/
-    # patterns
-    @regist_patterns = [
+    @prefix_ptn = /^(?<time>.{3}\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2}) (?<host>\S+) (?<cmd>.+)\[\d+\]: (?<qid>[0-9a-zA-Z]+): (?<message>.+)$/
+    @store_ptns = [
       /^client=.+$/,
       /^message-id=<(?<message_id>[^,]+)>$/,
-      /^DKIM-Signature field added \(s=(?<dkim_s>[^,]+), d=(?<dkim_d>[^,]+)\)$/
+      /^from=<(?<from>[^,]+)>, size=(?<size>[0-9]+), nrcpt=(?<nrcpt>[0-9]+).*$/
+#      /^DKIM-Signature field added \(s=(?<dkim_s>[^,]+), d=(?<dkim_d>[^,]+)\)$/
     ]
-    @reemit_patterns = [
+    @emit_ptns = [
       /^to=<(?<to>[^,]+)>, relay=(?<relay>[^ ]+), delay=(?<delay>[^ ]+), delays=(?<delays>[^ ]+), dsn=(?<dsn>[^ ]+), status=(?<status>[^ ]+) \((?<message>.+)\)$/
     ]
-    @remove_patterns = [
+    @clear_ptns = [
       /^removed$/
     ]
   end
@@ -60,7 +60,7 @@ class Fluent::MaillogOutput < Fluent::Output
 
   def summarize(line)
 
-    if @base_pattern =~ line
+    if @prefix_ptn =~ line
       qid     = Regexp.last_match[:qid]
       time    = Regexp.last_match[:time]
       message = Regexp.last_match[:message]
@@ -72,9 +72,9 @@ class Fluent::MaillogOutput < Fluent::Output
       end
 
       # regist
-      @regist_patterns.each do |pattern|
-        if pattern =~ message
-          pattern.named_captures.keys.each do |name|
+      @store_ptns.each do |ptn|
+        if ptn =~ message
+          ptn.named_captures.keys.each do |name|
             record[name] = Regexp.last_match[name.to_sym]
           end
           return nil
@@ -82,9 +82,9 @@ class Fluent::MaillogOutput < Fluent::Output
       end
 
       # emit
-      @reemit_patterns.each do |pattern|
-        if pattern =~ message
-          pattern.named_captures.keys.each do |name|
+      @emit_ptns.each do |ptn|
+        if ptn =~ message
+          ptn.named_captures.keys.each do |name|
             record[name] = Regexp.last_match[name.to_sym]
           end
           record['time'] = Time.parse(time).to_i
@@ -94,8 +94,8 @@ class Fluent::MaillogOutput < Fluent::Output
       end
 
       # remove
-      @remove_patterns.each do |pattern|
-        if pattern =~ message
+      @clear_ptns.each do |ptn|
+        if ptn =~ message
           @records.delete(qid)
         end
       end

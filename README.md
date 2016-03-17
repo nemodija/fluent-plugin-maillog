@@ -10,7 +10,7 @@ Aggregate a maillog for Postfix.
 ## Config
 
 |param|description|default|
-|-|-|-|
+|---|---|---|
 |tag|整形後のタグ|*Required*|
 |cache_dump_file|キャッシュ中のmaillogを停止時に出力するファイル|nil|
 |clean_interval_time|キャッシュをcleanする間隔|60 (sec)|
