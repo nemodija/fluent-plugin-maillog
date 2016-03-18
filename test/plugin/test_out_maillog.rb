@@ -133,22 +133,4 @@ EOS
       assert_equal true, actual == {}
     end
   end
-
-  def test_emit?
-    t = Fluent::MaillogOutput.new
-    assert_equal false, t.emit?(nil, nil, nil)
-    assert_equal true,  t.emit?('Sat Nov 15 20:00:00 JST 2014', nil, nil)
-    # start_send_time only
-    assert_equal true,  t.emit?('Sat Nov 15 20:00:00 JST 2014', 'Sat Nov 15 19:59:59 JST 2014', nil)
-    assert_equal true,  t.emit?('Sat Nov 15 20:00:00 JST 2014', 'Sat Nov 15 20:00:00 JST 2014', nil)
-    assert_equal false, t.emit?('Sat Nov 15 20:00:00 JST 2014', 'Sat Nov 15 20:00:01 JST 2014', nil)
-    # end_send_time only
-    assert_equal false, t.emit?('Sat Nov 15 20:00:00 JST 2014', nil, 'Sat Nov 15 19:59:59 JST 2014')
-    assert_equal true,  t.emit?('Sat Nov 15 20:00:00 JST 2014', nil, 'Sat Nov 15 20:00:00 JST 2014')
-    assert_equal true,  t.emit?('Sat Nov 15 20:00:00 JST 2014', nil, 'Sat Nov 15 20:00:01 JST 2014')
-    # start_send_time and end_send_time
-    assert_equal true,  t.emit?('Sat Nov 15 20:00:00 JST 2014', 'Sat Nov 15 19:59:59 JST 2014', 'Sat Nov 15 20:00:01 JST 2014')
-    assert_equal true,  t.emit?('Sat Nov 15 20:00:00 JST 2014', 'Sat Nov 15 20:00:00 JST 2014', 'Sat Nov 15 20:00:00 JST 2014')
-    assert_equal false, t.emit?('Sat Nov 15 20:00:00 JST 2014', 'Sat Nov 15 20:00:01 JST 2014', 'Sat Nov 15 19:59:59 JST 2014')
-  end
 end
