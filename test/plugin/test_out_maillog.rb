@@ -28,29 +28,31 @@ Nov  5 22:39:04 hostname postfix/qmgr[540]: 7D4381EB80E5: from=<xxxxx@from.examp
 Nov  5 22:39:05 hostname postfix/smtp[10808]: 7D4381EB80E5: to=<zzzzz@to.example.com>, relay=mail.to.example.com[192.168.0.100]:25, delay=1, delays=0.01/0.17/0.81/0.02, dsn=2.0.0, status=sent (250 ok:  Message 662556263 accepted)
 Nov  5 22:39:06 hostname postfix/qmgr[540]: 7D4381EB80E5: removed
 EOS
-    d = create_driver
-    d.run do
-      maillog.each_line do |message|
-        d.emit({'message' => message.chomp}, Time.parse("2012-01-01 00:00:00 UTC").to_i)
+    Timecop.freeze(Time.parse("2016-03-20 00:26:00")) do
+      d = create_driver
+      d.run do
+        maillog.each_line do |message|
+          d.emit({'message' => message.chomp}, Time.parse("2012-01-01 00:00:00 UTC").to_i)
+        end
       end
-    end
-    assert_equal 1, d.emits.size
-    d.emits.each do |emit|
-      assert_equal 'test.test', emit[0]
-      assert_equal Time.parse("2012-01-01 00:00:00 UTC").to_i, emit[1]
-      assert_equal '7D4381EB80E5', emit[2]['qid']
-      assert_equal '545A28A8.9070401@from.example.com', emit[2]['message_id']
-      assert_equal 'xxxxx@from.example.com', emit[2]['from']
-      assert_equal '662', emit[2]['size']
-      assert_equal '2', emit[2]['nrcpt']
-      assert_equal 'zzzzz@to.example.com', emit[2]['to']
-      assert_equal 'mail.to.example.com[192.168.0.100]:25', emit[2]['relay']
-      assert_equal '1', emit[2]['delay']
-      assert_equal '0.01/0.17/0.81/0.02', emit[2]['delays']
-      assert_equal '2.0.0', emit[2]['dsn']
-      assert_equal 'sent', emit[2]['status']
-      assert_equal '250 ok:  Message 662556263 accepted', emit[2]['message']
-      assert_equal Time.parse("Nov  5 22:39:05").to_i, emit[2]['time']
+      assert_equal 1, d.emits.size
+      d.emits.each do |emit|
+        assert_equal 'test.test', emit[0]
+        assert_equal Time.parse("2012-01-01 00:00:00 UTC").to_i, emit[1]
+        assert_equal '7D4381EB80E5', emit[2]['qid']
+        assert_equal '545A28A8.9070401@from.example.com', emit[2]['message_id']
+        assert_equal 'xxxxx@from.example.com', emit[2]['from']
+        assert_equal '662', emit[2]['size']
+        assert_equal '2', emit[2]['nrcpt']
+        assert_equal 'zzzzz@to.example.com', emit[2]['to']
+        assert_equal 'mail.to.example.com[192.168.0.100]:25', emit[2]['relay']
+        assert_equal '1', emit[2]['delay']
+        assert_equal '0.01/0.17/0.81/0.02', emit[2]['delays']
+        assert_equal '2.0.0', emit[2]['dsn']
+        assert_equal 'sent', emit[2]['status']
+        assert_equal '250 ok:  Message 662556263 accepted', emit[2]['message']
+        assert_equal Time.parse("2015-11-05 22:39:05").to_i, emit[2]['time']
+      end
     end
   end
 

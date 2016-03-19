@@ -68,7 +68,7 @@ module Fluent
         return nil if qid.nil? || time.nil?
         record = @records[qid]
         if record.nil?
-          record = { 'qid' => qid, 'time' => Time.parse(time).to_i }
+          record = { 'qid' => qid, 'time' => revise_time(time).to_i }
           @records.store(qid, record)
         end
 
@@ -88,7 +88,7 @@ module Fluent
             ptn.named_captures.keys.each do |name|
               record[name] = Regexp.last_match[name.to_sym]
             end
-            record['time'] = Time.parse(time).to_i
+            record['time'] = revise_time(time).to_i
             return record
           end
         end
