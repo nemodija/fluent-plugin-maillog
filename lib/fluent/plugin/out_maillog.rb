@@ -6,8 +6,10 @@ module Fluent
     config_param :cache_dump_file,     :string,  :default => nil
     config_param :clean_interval_time, :integer, :default => 60
     config_param :lifetime,            :integer, :default => 3600
+    config_param :revise_time,         :bool,    :default => true
 
     attr_accessor :records
+    attr_accessor :revise_time
     attr_reader   :latest_clean_time
 
     def initialize
@@ -102,6 +104,12 @@ module Fluent
       clean_record_cache
 
       return nil
+    end
+
+    def revise_time(time)
+      t = Time.parse(time)
+      return Time.parse("#{t.year - 1}-#{t.strftime("%m-%d %H:%M:%S")}") if @revise_time && t > Time.now
+      return t
     end
 
     def clean_record_cache(clean_interval_time = @clean_interval_time, lifetime = @lifetime)
