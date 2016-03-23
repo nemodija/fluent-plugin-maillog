@@ -68,7 +68,7 @@ module Fluent
         return nil if qid.nil? || time.nil?
         record = @records[qid]
         if record.nil?
-          record = { 'qid' => qid, 'time' => revise_time(time).to_i }
+          record = { 'qid' => qid, 'time' => revised_time(time).to_i }
           @records.store(qid, record)
         end
 
@@ -88,7 +88,7 @@ module Fluent
             ptn.named_captures.keys.each do |name|
               record[name] = Regexp.last_match[name.to_sym]
             end
-            record['time'] = revise_time(time).to_i
+            record['time'] = revised_time(time).to_i
             return record
           end
         end
@@ -106,7 +106,7 @@ module Fluent
       return nil
     end
 
-    def revise_time(time)
+    def revised_time(time)
       t = Time.parse(time)
       return Time.parse("#{t.year - 1}-#{t.strftime("%m-%d %H:%M:%S")}") if @revise_time && t > Time.now
       return t
@@ -114,24 +114,33 @@ module Fluent
 
     def clean_record_cache(clean_interval_time = @clean_interval_time, lifetime = @lifetime)
       return if Time.now.to_i < @latest_clean_time + clean_interval_time
+      cnt = @records.length
       @records.delete_if do |key, record|
         Time.now.to_i > record['time'] + lifetime
       end
       @latest_clean_time = Time.now.to_i
+      # logging
+      del_cnt = cnt - @records.length
+      next_time = Time.at(@latest_clean_time + clean_interval_time)
+      $log.info "[maillog] cleaned record cache : { count => #{del_cnt}, next_time => #{next_time} }"
     end
 
     def read_cache_dump_file(cache_dump_file = @cache_dump_file)
       return Hash.new if cache_dump_file.nil?
       return Hash.new if !FileTest.exists?(cache_dump_file)
       h = JSON.parse(File.read(cache_dump_file, :encoding => Encoding::UTF_8))
+      $log.info "[maillog] imported cache dump file : { file => #{cache_dump_file}, count => #{h.length} }"
       File.unlink cache_dump_file
+      $log.info "[maillog] removed cache dump file : { file => #{cache_dump_file} }"
       return h
     end
 
     def write_cache_dump_file(cache_dump_file = @cache_dump_file, records = @records)
       return if cache_dump_file.nil?
-      return if records.length < 1
-      File.write(cache_dump_file, records.to_json)
+      if records.length > 0
+        File.write(cache_dump_file, records.to_json)
+        $log.info "[maillog] exported chach dump file : { file => #{cache_dump_file}, count => #{records.length} }"
+      end
     end
   end
 end

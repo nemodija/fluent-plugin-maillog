@@ -136,19 +136,19 @@ EOS
     end
   end
 
-  def test_revise_time
+  def test_revised_time
     t = Fluent::MaillogOutput.new
     Timecop.freeze(Time.parse("2015-01-01 00:00:01")) do
-      assert_equal Time.parse("2014-12-31 23:59:59"), t.revise_time("Dec 31 23:59:59")
-      assert_equal Time.parse("2015-01-01 00:00:00"), t.revise_time("Jan  1 00:00:00")
-      assert_equal Time.parse("2015-01-01 00:00:01"), t.revise_time("Jan  1 00:00:01")
-      assert_equal Time.parse("2014-01-01 00:00:02"), t.revise_time("Jan  1 00:00:02")
+      assert_equal Time.parse("2014-12-31 23:59:59"), t.revised_time("Dec 31 23:59:59")
+      assert_equal Time.parse("2015-01-01 00:00:00"), t.revised_time("Jan  1 00:00:00")
+      assert_equal Time.parse("2015-01-01 00:00:01"), t.revised_time("Jan  1 00:00:01")
+      assert_equal Time.parse("2014-01-01 00:00:02"), t.revised_time("Jan  1 00:00:02")
       # disabled revise_time
       t.revise_time = false
-      assert_equal Time.parse("2015-12-31 23:59:59"), t.revise_time("Dec 31 23:59:59")
-      assert_equal Time.parse("2015-01-01 00:00:00"), t.revise_time("Jan  1 00:00:00")
-      assert_equal Time.parse("2015-01-01 00:00:01"), t.revise_time("Jan  1 00:00:01")
-      assert_equal Time.parse("2015-01-01 00:00:02"), t.revise_time("Jan  1 00:00:02")
+      assert_equal Time.parse("2015-12-31 23:59:59"), t.revised_time("Dec 31 23:59:59")
+      assert_equal Time.parse("2015-01-01 00:00:00"), t.revised_time("Jan  1 00:00:00")
+      assert_equal Time.parse("2015-01-01 00:00:01"), t.revised_time("Jan  1 00:00:01")
+      assert_equal Time.parse("2015-01-01 00:00:02"), t.revised_time("Jan  1 00:00:02")
     end
   end
 end
