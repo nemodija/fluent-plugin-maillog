@@ -1,5 +1,6 @@
 language: ruby
 rvm:
   - 2.2.2
+sudo: required
 before_install: gem install bundler -v 1.10.6
 script: bundle exec rake

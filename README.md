@@ -1,5 +1,7 @@
 # Fluent::Plugin::Maillog
 
+[![Build Status](https://secure.travis-ci.org/nemonium/fluent-plugin-maillog.png)](https://travis-ci.org/nemonium/fluent-plugin-maillog)
+
 Aggregate a maillog for Postfix.
 
 ## Installation
