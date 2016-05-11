@@ -1,6 +1,7 @@
 # Fluent::Plugin::Maillog
 
 [![Build Status](https://secure.travis-ci.org/nemonium/fluent-plugin-maillog.png)](https://travis-ci.org/nemonium/fluent-plugin-maillog)
+[![Coverage Status](https://coveralls.io/repos/github/nemonium/fluent-plugin-maillog/badge.svg?branch=master)](https://coveralls.io/github/nemonium/fluent-plugin-maillog)
 
 Aggregate a maillog for Postfix.
 
