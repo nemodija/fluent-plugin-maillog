@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "fluent-plugin-maillog"
-  spec.version       = "0.0.1"
+  spec.version       = "0.9.0"
   spec.authors       = ["nemonium"]
   spec.email         = ["kenichiro.nemoto@gmail.com"]
   spec.summary       = %q{Summarizing maillog.}
@@ -18,6 +18,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "bundler", "~> 1.6"
-  spec.add_development_dependency "rake"
+  spec.add_development_dependency "rake", "10.4.2"
+  spec.add_development_dependency "test-unit"
+  spec.add_development_dependency "coveralls"
+  spec.add_development_dependency "timecop"
   spec.add_runtime_dependency "fluentd"
 end
