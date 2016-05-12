@@ -7,7 +7,7 @@ module Fluent
     config_param :clean_interval_time, :integer, :default => 60
     config_param :lifetime,            :integer, :default => 3600
     config_param :revise_time,         :bool,    :default => true
-    config_param :record_key,          :string,  :default => 'message'
+    config_param :field,               :string,  :default => 'message'
 
     attr_accessor :records
     attr_accessor :revise_time
@@ -53,7 +53,7 @@ module Fluent
 
     def emit(tag, es, chain)
       es.each do |time, record|
-        summary = summarize(record[@record_key])
+        summary = summarize(record[@field])
         next if summary.nil?
         Fluent::Engine.emit(@tag, time, summary)
         if @interrupted_qid.include?(summary['qid'])
