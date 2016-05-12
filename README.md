@@ -20,6 +20,7 @@ Aggregate a maillog for Postfix.
 |clean_interval_time|キャッシュをcleanする間隔|integer|no|60 (sec)|
 |lifetime|キャッシュ上の生存期間|integer|no|3600 (sec)|
 |revise_time|現時刻より `time` が未来になる場合、日付を1年前に変更するかどうか<br>これは maillog に `year` が含まれないことへの対応|bool|no|true|
+|field|参照する filed を指定|string|no|message|
 
 ## Usage
 
