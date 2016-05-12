@@ -41,6 +41,8 @@ module Fluent
     def start
       super
       @records = read_cache_dump_file
+      @interrupted_qid = @records.keys
+      $log.debug "[maillog] read qid : #{@interrupted_qid}" if @interrupted_qid.size > 0
     end
 
     def shutdown
@@ -54,13 +56,15 @@ module Fluent
           summary = summarize(line)
           next if summary.nil?
           Fluent::Engine.emit(@tag, time, summary)
+          if @interrupted_qid.include?(summary['qid'])
+            $log.debug "[maillog] #{summary['qid']} : emit"
+          end
         end
       end
       chain.next
     end
 
     def summarize(line)
-
       if @prefix_ptn =~ line
         qid     = Regexp.last_match[:qid]
         time    = Regexp.last_match[:time]
@@ -71,7 +75,7 @@ module Fluent
           record = { 'qid' => qid, 'time' => revised_time(time).to_i }
           @records.store(qid, record)
         end
-
+        $log.debug "[maillog] #{qid} : #{message}" if @interrupted_qid.include?(qid)
         # regist
         @store_ptns.each do |ptn|
           if ptn =~ message
@@ -81,7 +85,6 @@ module Fluent
             return nil
           end
         end
-
         # emit
         @emit_ptns.each do |ptn|
           if ptn =~ message
@@ -92,7 +95,6 @@ module Fluent
             return record
           end
         end
-
         # remove
         @clear_ptns.each do |ptn|
           if ptn =~ message
@@ -100,9 +102,7 @@ module Fluent
           end
         end
       end
-
       clean_record_cache
-
       return nil
     end
 
@@ -140,6 +140,7 @@ module Fluent
       if records.length > 0
         File.write(cache_dump_file, records.to_json)
         $log.info "[maillog] exported chach dump file : { file => #{cache_dump_file}, count => #{records.length} }"
+        $log.debug "[maillog] dump qid : #{records.keys}"
       end
     end
   end
