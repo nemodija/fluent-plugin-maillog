@@ -1,9 +1,8 @@
 # Fluent::Plugin::Maillog
 
-[![Build Status](https://secure.travis-ci.org/nemonium/fluent-plugin-maillog.png)](https://travis-ci.org/nemonium/fluent-plugin-maillog)
-[![Coverage Status](https://coveralls.io/repos/github/nemonium/fluent-plugin-maillog/badge.svg?branch=master)](https://coveralls.io/github/nemonium/fluent-plugin-maillog)
-[![Code Climate](https://codeclimate.com/github/nemonium/fluent-plugin-maillog/badges/gpa.svg)](https://codeclimate.com/github/nemonium/fluent-plugin-maillog)
-[![Dependency Status](https://gemnasium.com/badges/github.com/nemonium/fluent-plugin-maillog.svg)](https://gemnasium.com/github.com/nemonium/fluent-plugin-maillog)
+[![Build Status](https://secure.travis-ci.org/nemodija/fluent-plugin-maillog.png)](https://travis-ci.org/nemodija/fluent-plugin-maillog)
+[![Coverage Status](https://coveralls.io/repos/github/nemodija/fluent-plugin-maillog/badge.svg?branch=master)](https://coveralls.io/github/nemodija/fluent-plugin-maillog)
+[![Code Climate](https://codeclimate.com/github/nemodija/fluent-plugin-maillog/badges/gpa.svg)](https://codeclimate.com/github/nemodija/fluent-plugin-maillog)
 
 Aggregate a maillog for Postfix.
 
